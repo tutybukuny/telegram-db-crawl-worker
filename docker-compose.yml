@@ -1,0 +1,16 @@
+version: "3.3"
+
+services:
+  worker:
+    build: .
+    image: telegram-crawl-worker
+    container_name: telegram-crawl-worker
+#    command: ["sleep", "10000"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      MYSQL__HOST: host.docker.internal
+    volumes:
+      - ./.env:/app/.env
+      - ./config.json:/app/config.json
+      - ./.tdlib:/app/.tdlib
