@@ -1,0 +1,7 @@
+.idea/
+vendor/
+dist/
+.tdlib/
+
+.env
+config.json
