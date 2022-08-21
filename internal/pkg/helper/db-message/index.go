@@ -52,13 +52,7 @@ func (h *DBMessageHelper) Save(ctx context.Context, config *dbsaverconfig.Config
 		return nil
 	} else {
 		files := h.buildFile(nil, message)
-		messageType := -1
-		if message.ForwardInfo != nil {
-			if forwardConfig, ok := h.dbsaverConfigMap[fmt.Sprintf("%d", message.ForwardInfo.FromChatId)]; ok {
-				messageType = forwardConfig.ChannelType
-			}
-		}
-		return h.saveMessages(ctx, config, messageType, files)
+		return h.saveMessages(ctx, config, h.getMessageType(message), files)
 	}
 }
 
@@ -139,9 +133,7 @@ loop:
 		case message := <-messages:
 			files = h.buildFile(files, message)
 			if message.ForwardInfo != nil && messageType < 0 {
-				if forwardConfig, ok := h.dbsaverConfigMap[fmt.Sprintf("%d", message.ForwardInfo.FromChatId)]; ok {
-					messageType = forwardConfig.ChannelType
-				}
+				messageType = h.getMessageType(message)
 			}
 		case <-timer.C:
 			break loop
@@ -149,4 +141,21 @@ loop:
 	}
 
 	return h.saveMessages(ctx, config, messageType, files)
+}
+
+func (h *DBMessageHelper) getMessageType(message *client.Message) int {
+	messageType := -1
+	if message.ForwardInfo != nil {
+		channelID := int64(0)
+		switch message.ForwardInfo.Origin.MessageForwardOriginType() {
+		case client.TypeMessageForwardOriginChannel:
+			channelID = message.ForwardInfo.Origin.(*client.MessageForwardOriginChannel).ChatId
+		case client.TypeMessageForwardOriginChat:
+			channelID = message.ForwardInfo.Origin.(*client.MessageForwardOriginChat).SenderChatId
+		}
+		if forwardConfig, ok := h.dbsaverConfigMap[fmt.Sprintf("%d", channelID)]; ok {
+			messageType = forwardConfig.ChannelType
+		}
+	}
+	return messageType
 }
