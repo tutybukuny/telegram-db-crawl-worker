@@ -10,10 +10,6 @@ import (
 	"crawl-worker/pkg/l"
 )
 
-var filteredContents = []string{
-	"win79", "rikvip",
-}
-
 func (s *serviceImpl) SaveMessage(ctx context.Context, message *client.Message) error {
 	config, ok := s.dbsaverConfigMap[fmt.Sprintf("%d", message.ChatId)]
 	if !ok {
@@ -52,7 +48,7 @@ func (s *serviceImpl) isFilteredMessage(ctx context.Context, message *client.Mes
 
 func (s *serviceImpl) isFilteredContent(content string) bool {
 	content = strings.ToLower(content)
-	for _, filteredContent := range filteredContents {
+	for _, filteredContent := range s.filteredContents {
 		if strings.Contains(content, filteredContent) {
 			return true
 		}

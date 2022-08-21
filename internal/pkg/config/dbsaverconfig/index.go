@@ -16,7 +16,12 @@ type Config struct {
 
 type ConfigMap map[string]*Config
 
-func LoadConfig(configPath string) ConfigMap {
+type RootConfig struct {
+	ConfigMap        ConfigMap `json:"config_map,omitempty"`
+	FilteredContents []string  `json:"filtered_contents,omitempty"`
+}
+
+func LoadConfig(configPath string) *RootConfig {
 	var ll l.Logger
 	container.NamedResolve(&ll, "ll")
 
@@ -24,7 +29,7 @@ func LoadConfig(configPath string) ConfigMap {
 		configPath = "./config.json"
 	}
 
-	configMap := make(ConfigMap)
+	rootConfig := new(RootConfig)
 
 	file, err := os.Open(configPath)
 	if err != nil {
@@ -35,13 +40,13 @@ func LoadConfig(configPath string) ConfigMap {
 	if err != nil {
 		ll.Fatal("cannot read dbsaver config", l.String("config_path", configPath), l.Error(err))
 	}
-	err = json.Unmarshal(configJson, &configMap)
+	err = json.Unmarshal(configJson, rootConfig)
 	if err != nil {
 		ll.Fatal("cannot parse channel config",
 			l.String("channel_config_file", configPath),
 			l.ByteString("config_json", configJson), l.Error(err))
 	}
-	ll.Info("loaded dbsaver config", l.Object("channel_config", configMap))
+	ll.Info("loaded dbsaver config", l.Object("channel_config", rootConfig))
 
-	return configMap
+	return rootConfig
 }

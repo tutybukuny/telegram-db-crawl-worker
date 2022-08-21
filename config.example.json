@@ -1,26 +1,33 @@
 {
-  "-1001340233288": {
-    "channel_id": -1001340233288,
-    "channel_type": 1
+  "config_map": {
+    "-1001340233288": {
+      "channel_id": -1001340233288,
+      "channel_type": 1
+    },
+    "-1001198142172": {
+      "channel_id": -1001198142172,
+      "channel_type": 1
+    },
+    "-1001798731674": {
+      "channel_id": -1001798731674,
+      "channel_type": 1
+    },
+    "-1001164606130": {
+      "channel_id": -1001164606130,
+      "channel_type": 0
+    },
+    "-1001251673256": {
+      "channel_id": -1001251673256,
+      "channel_type": 0
+    },
+    "-723110497": {
+      "channel_id": -723110497,
+      "channel_type": 0
+    },
+    "-1001638127226": {
+      "channel_id": -1001638127226,
+      "channel_type": 0
+    }
   },
-  "-1001198142172": {
-    "channel_id": -1001198142172,
-    "channel_type": 1
-  },
-  "-1001798731674": {
-    "channel_id": -1001798731674,
-    "channel_type": 1
-  },
-  "-1001164606130": {
-    "channel_id": -1001164606130,
-    "channel_type": 0
-  },
-  "-1001251673256": {
-    "channel_id": -1001251673256,
-    "channel_type": 0
-  },
-  "-1001638127226": {
-    "channel_id": -1001638127226,
-    "channel_type": 0
-  }
+  "filtered_contents": ["win79", "rikvip", "sòng bài las vegas", "nạp rút siêu nhanh"]
 }

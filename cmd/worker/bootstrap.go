@@ -39,8 +39,12 @@ func bootstrap(cfg *config.Config) {
 	})
 
 	//region config
+	rootConfig := dbsaverconfig.LoadConfig(cfg.ConfigFile)
 	container.NamedSingleton("dbsaverConfigMap", func() dbsaverconfig.ConfigMap {
-		return dbsaverconfig.LoadConfig(cfg.ConfigFile)
+		return rootConfig.ConfigMap
+	})
+	container.NamedSingleton("filteredContents", func() []string {
+		return rootConfig.FilteredContents
 	})
 	//endregion
 

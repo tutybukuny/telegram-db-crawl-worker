@@ -23,6 +23,7 @@ type serviceImpl struct {
 	tdClient         *client.Client          `container:"name"`
 	mediaMessageRepo mediamessagerepo.IRepo  `container:"name"`
 	dbsaverConfigMap dbsaverconfig.ConfigMap `container:"name"`
+	filteredContents []string                `container:"name"`
 
 	dbMessageHelper *dbmessagehelper.DBMessageHelper
 }
