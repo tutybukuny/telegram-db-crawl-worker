@@ -2,6 +2,7 @@ package dbmessagehelper
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/zelenin/go-tdlib/client"
@@ -15,9 +16,10 @@ import (
 )
 
 type DBMessageHelper struct {
-	ll               l.Logger               `container:"name"`
-	gpooling         gpooling.IPool         `container:"name"`
-	mediaMessageRepo mediamessagerepo.IRepo `container:"name"`
+	ll               l.Logger                `container:"name"`
+	gpooling         gpooling.IPool          `container:"name"`
+	mediaMessageRepo mediamessagerepo.IRepo  `container:"name"`
+	dbsaverConfigMap dbsaverconfig.ConfigMap `container:"name"`
 
 	ChannelID     int64
 	ForwardToIDs  []int64
@@ -50,7 +52,13 @@ func (h *DBMessageHelper) Save(ctx context.Context, config *dbsaverconfig.Config
 		return nil
 	} else {
 		files := h.buildFile(nil, message)
-		return h.saveMessages(ctx, config, files)
+		messageType := -1
+		if message.ForwardInfo != nil {
+			if forwardConfig, ok := h.dbsaverConfigMap[fmt.Sprintf("%d", message.ForwardInfo.FromChatId)]; ok {
+				messageType = forwardConfig.ChannelType
+			}
+		}
+		return h.saveMessages(ctx, config, messageType, files)
 	}
 }
 
@@ -91,14 +99,18 @@ func (h *DBMessageHelper) buildFile(files []entity.Message, message *client.Mess
 	return files
 }
 
-func (h *DBMessageHelper) saveMessages(ctx context.Context, config *dbsaverconfig.Config, messages []entity.Message) error {
+func (h *DBMessageHelper) saveMessages(ctx context.Context, config *dbsaverconfig.Config, messageType int, messages []entity.Message) error {
 	if len(messages) == 0 {
 		return nil
 	}
 
+	if messageType < 0 {
+		messageType = config.ChannelType
+	}
+
 	msg := &entity.MediaMessage{
 		Messages: messages,
-		Type:     config.ChannelType,
+		Type:     messageType,
 	}
 
 	err := h.mediaMessageRepo.Insert(ctx, msg)
@@ -119,15 +131,22 @@ func (h *DBMessageHelper) saveGroupMessages(ctx context.Context, config *dbsaver
 	timer := time.NewTimer(5 * time.Second)
 	defer timer.Stop()
 
+	messageType := -1
+
 loop:
 	for {
 		select {
 		case message := <-messages:
 			files = h.buildFile(files, message)
+			if message.ForwardInfo != nil && messageType < 0 {
+				if forwardConfig, ok := h.dbsaverConfigMap[fmt.Sprintf("%d", message.ForwardInfo.FromChatId)]; ok {
+					messageType = forwardConfig.ChannelType
+				}
+			}
 		case <-timer.C:
 			break loop
 		}
 	}
 
-	return h.saveMessages(ctx, config, files)
+	return h.saveMessages(ctx, config, messageType, files)
 }

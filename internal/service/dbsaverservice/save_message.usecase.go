@@ -10,7 +10,7 @@ import (
 )
 
 func (s *serviceImpl) SaveMessage(ctx context.Context, message *client.Message) error {
-	config, ok := s.configMap[fmt.Sprintf("%d", message.ChatId)]
+	config, ok := s.dbsaverConfigMap[fmt.Sprintf("%d", message.ChatId)]
 	if !ok {
 		s.ll.Debug("not configured channel, just ignored it", l.Int64("channel_id", message.ChatId))
 		return nil

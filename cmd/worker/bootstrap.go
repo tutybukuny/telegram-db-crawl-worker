@@ -8,6 +8,7 @@ import (
 
 	"crawl-worker/config"
 	"crawl-worker/internal/model/entity"
+	"crawl-worker/internal/pkg/config/dbsaverconfig"
 	"crawl-worker/internal/repository/media-message"
 	"crawl-worker/internal/service/dbsaverservice"
 	mediamessagestore "crawl-worker/internal/storage/mysql/media-message"
@@ -37,6 +38,12 @@ func bootstrap(cfg *config.Config) {
 		return validator.New()
 	})
 
+	//region config
+	container.NamedSingleton("dbsaverConfigMap", func() dbsaverconfig.ConfigMap {
+		return dbsaverconfig.LoadConfig(cfg.ConfigFile)
+	})
+	//endregion
+
 	//region init store
 	db := mysql.New(cfg.MysqlConfig, ll)
 	mysql.AutoMigration(db, []any{
@@ -61,7 +68,7 @@ func bootstrap(cfg *config.Config) {
 
 	//region init service
 	container.NamedSingleton("dbsaverService", func() dbsaverservice.IService {
-		return dbsaverservice.New(cfg)
+		return dbsaverservice.New()
 	})
 	//endregion
 }
