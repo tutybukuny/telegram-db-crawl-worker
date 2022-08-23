@@ -46,7 +46,7 @@ func getConnection(cfg Config, ll l.Logger) *gorm.DB {
 		Net:                  "tcp",
 		Addr:                 fmt.Sprintf("%s:%s", cfg.Host, cfg.Port),
 		DBName:               cfg.Database,
-		Params:               map[string]string{"charset": "utf8"},
+		Params:               map[string]string{"charset": "utf8mb4"},
 		ParseTime:            true,
 		Loc:                  loc,
 		AllowNativePasswords: true,
