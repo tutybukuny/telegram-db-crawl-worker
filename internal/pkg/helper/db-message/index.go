@@ -35,7 +35,7 @@ func New() *DBMessageHelper {
 	return h
 }
 
-func (h *DBMessageHelper) Save(ctx context.Context, config *dbsaverconfig.Config, message *client.Message) error {
+func (h *DBMessageHelper) Save(ctx context.Context, channel *entity.Channel, config *dbsaverconfig.Config, message *client.Message) error {
 	if message.MediaAlbumId != 0 {
 		mediaAlbumID := int64(message.MediaAlbumId)
 		messages, ok := h.mediaAlbumMap[mediaAlbumID]
@@ -43,7 +43,7 @@ func (h *DBMessageHelper) Save(ctx context.Context, config *dbsaverconfig.Config
 			messages = make(chan *client.Message)
 			h.mediaAlbumMap[mediaAlbumID] = messages
 			h.gpooling.Submit(func() {
-				h.saveGroupMessages(ctx, config, mediaAlbumID, messages)
+				h.saveGroupMessages(ctx, channel, config, mediaAlbumID, messages)
 			})
 		}
 		select {
@@ -52,7 +52,7 @@ func (h *DBMessageHelper) Save(ctx context.Context, config *dbsaverconfig.Config
 		return nil
 	} else {
 		files := h.buildFile(nil, message)
-		return h.saveMessages(ctx, config, h.getMessageType(message), files)
+		return h.saveMessages(ctx, channel, config, h.getMessageType(message), files)
 	}
 }
 
@@ -93,7 +93,7 @@ func (h *DBMessageHelper) buildFile(files []entity.Message, message *client.Mess
 	return files
 }
 
-func (h *DBMessageHelper) saveMessages(ctx context.Context, config *dbsaverconfig.Config, messageType int, messages []entity.Message) error {
+func (h *DBMessageHelper) saveMessages(ctx context.Context, channel *entity.Channel, config *dbsaverconfig.Config, messageType int, messages []entity.Message) error {
 	if len(messages) == 0 {
 		return nil
 	}
@@ -103,8 +103,9 @@ func (h *DBMessageHelper) saveMessages(ctx context.Context, config *dbsaverconfi
 	}
 
 	msg := &entity.MediaMessage{
-		Messages: messages,
-		Type:     messageType,
+		SourceChannelID: channel.ID,
+		Messages:        messages,
+		Type:            messageType,
 	}
 
 	err := h.mediaMessageRepo.Insert(ctx, msg)
@@ -117,7 +118,7 @@ func (h *DBMessageHelper) saveMessages(ctx context.Context, config *dbsaverconfi
 	return nil
 }
 
-func (h *DBMessageHelper) saveGroupMessages(ctx context.Context, config *dbsaverconfig.Config, mediaAlbumID int64, messages chan *client.Message) error {
+func (h *DBMessageHelper) saveGroupMessages(ctx context.Context, channel *entity.Channel, config *dbsaverconfig.Config, mediaAlbumID int64, messages chan *client.Message) error {
 	defer delete(h.mediaAlbumMap, mediaAlbumID)
 	defer close(messages)
 
@@ -140,7 +141,7 @@ loop:
 		}
 	}
 
-	return h.saveMessages(ctx, config, messageType, files)
+	return h.saveMessages(ctx, channel, config, messageType, files)
 }
 
 func (h *DBMessageHelper) getMessageType(message *client.Message) int {

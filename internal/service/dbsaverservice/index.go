@@ -7,6 +7,7 @@ import (
 
 	"crawl-worker/internal/pkg/config/dbsaverconfig"
 	dbmessagehelper "crawl-worker/internal/pkg/helper/db-message"
+	channelrepo "crawl-worker/internal/repository/channel"
 	"crawl-worker/internal/repository/media-message"
 	"crawl-worker/pkg/container"
 	"crawl-worker/pkg/gpooling"
@@ -22,6 +23,7 @@ type serviceImpl struct {
 	gpooling         gpooling.IPool          `container:"name"`
 	tdClient         *client.Client          `container:"name"`
 	mediaMessageRepo mediamessagerepo.IRepo  `container:"name"`
+	channelRepo      channelrepo.IRepo       `container:"name"`
 	dbsaverConfigMap dbsaverconfig.ConfigMap `container:"name"`
 	filteredContents []string                `container:"name"`
 

@@ -9,8 +9,10 @@ import (
 	"crawl-worker/config"
 	"crawl-worker/internal/model/entity"
 	"crawl-worker/internal/pkg/config/dbsaverconfig"
+	channelrepo "crawl-worker/internal/repository/channel"
 	"crawl-worker/internal/repository/media-message"
 	"crawl-worker/internal/service/dbsaverservice"
+	channelstore "crawl-worker/internal/storage/mysql/channel"
 	mediamessagestore "crawl-worker/internal/storage/mysql/media-message"
 	"crawl-worker/pkg/container"
 	"crawl-worker/pkg/gpooling"
@@ -52,10 +54,15 @@ func bootstrap(cfg *config.Config) {
 	db := mysql.New(cfg.MysqlConfig, ll)
 	mysql.AutoMigration(db, []any{
 		&entity.MediaMessage{},
+		&entity.Channel{},
 	}, ll)
 
 	container.NamedSingleton("db", func() *gorm.DB {
 		return db
+	})
+
+	container.NamedSingleton("channelRepo", func() channelrepo.IRepo {
+		return channelstore.New(db)
 	})
 
 	container.NamedSingleton("mediaMessageRepo", func() mediamessagerepo.IRepo {
