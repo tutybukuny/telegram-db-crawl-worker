@@ -18,6 +18,7 @@ type Config struct {
 
 	ConfigFile  string `json:"config_file" mapstructure:"config_file"`
 	MaxPoolSize int    `json:"max_pool_size" mapstructure:"max_pool_size"`
+	IsSaveRaw   bool   `json:"is_save_raw" mapstructure:"is_save_raw"`
 }
 
 // SentryConfig ...

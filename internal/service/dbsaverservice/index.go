@@ -30,9 +30,9 @@ type serviceImpl struct {
 	dbMessageHelper *dbmessagehelper.DBMessageHelper
 }
 
-func New() *serviceImpl {
+func New(isSaveRaw bool) *serviceImpl {
 	service := &serviceImpl{
-		dbMessageHelper: dbmessagehelper.New(),
+		dbMessageHelper: dbmessagehelper.New(isSaveRaw),
 	}
 	container.Fill(service)
 

@@ -79,7 +79,7 @@ func bootstrap(cfg *config.Config) {
 
 	//region init service
 	container.NamedSingleton("dbsaverService", func() dbsaverservice.IService {
-		return dbsaverservice.New()
+		return dbsaverservice.New(cfg.IsSaveRaw)
 	})
 	//endregion
 }

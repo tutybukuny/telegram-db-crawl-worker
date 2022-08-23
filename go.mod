@@ -15,6 +15,7 @@ require (
 	github.com/thnthien/impa v1.0.3
 	github.com/zelenin/go-tdlib v0.6.0
 	go.uber.org/zap v1.22.0
+	gorm.io/datatypes v1.0.7
 	gorm.io/driver/mysql v1.3.6
 	gorm.io/gorm v1.23.8
 )

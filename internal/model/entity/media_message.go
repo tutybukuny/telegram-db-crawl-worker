@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"gorm.io/datatypes"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -92,6 +93,7 @@ type MediaMessage struct {
 	ID              int64 `gorm:"primaryKey"`
 	SourceChannelID int64 `gorm:"index"`
 	Messages        Messages
+	Raw             datatypes.JSON
 	Type            int       `gorm:"index"`
 	CreatedAt       time.Time `gorm:"index"`
 	UpdatedAt       time.Time `gorm:"index"`

@@ -12,6 +12,7 @@ import (
 	mediamessagerepo "crawl-worker/internal/repository/media-message"
 	"crawl-worker/pkg/container"
 	"crawl-worker/pkg/gpooling"
+	"crawl-worker/pkg/json"
 	"crawl-worker/pkg/l"
 )
 
@@ -24,11 +25,13 @@ type DBMessageHelper struct {
 	ChannelID     int64
 	ForwardToIDs  []int64
 	mediaAlbumMap map[int64]chan *client.Message
+	isSaveRaw     bool
 }
 
-func New() *DBMessageHelper {
+func New(isSaveRaw bool) *DBMessageHelper {
 	h := &DBMessageHelper{
 		mediaAlbumMap: make(map[int64]chan *client.Message),
+		isSaveRaw:     isSaveRaw,
 	}
 	container.Fill(h)
 
@@ -51,12 +54,12 @@ func (h *DBMessageHelper) Save(ctx context.Context, channel *entity.Channel, con
 		}
 		return nil
 	} else {
-		files := h.buildFile(nil, message)
-		return h.saveMessages(ctx, channel, config, h.getMessageType(message), files)
+		files, raw := h.buildFile(nil, message)
+		return h.saveMessages(ctx, channel, config, h.getMessageType(message), files, raw)
 	}
 }
 
-func (h *DBMessageHelper) buildFile(files []entity.Message, message *client.Message) []entity.Message {
+func (h *DBMessageHelper) buildFile(files []entity.Message, message *client.Message) ([]entity.Message, any) {
 	if files == nil {
 		files = make([]entity.Message, 0, 1)
 	}
@@ -90,10 +93,14 @@ func (h *DBMessageHelper) buildFile(files []entity.Message, message *client.Mess
 		h.ll.Error("unhandled message content type", l.String("message_content_type", message.Content.MessageContentType()))
 	}
 
-	return files
+	return files, message.Content
 }
 
-func (h *DBMessageHelper) saveMessages(ctx context.Context, channel *entity.Channel, config *dbsaverconfig.Config, messageType int, messages []entity.Message) error {
+func (h *DBMessageHelper) saveMessages(
+	ctx context.Context, channel *entity.Channel,
+	config *dbsaverconfig.Config, messageType int,
+	messages []entity.Message, raw any,
+) error {
 	if len(messages) == 0 {
 		return nil
 	}
@@ -106,6 +113,11 @@ func (h *DBMessageHelper) saveMessages(ctx context.Context, channel *entity.Chan
 		SourceChannelID: channel.ID,
 		Messages:        messages,
 		Type:            messageType,
+	}
+
+	if h.isSaveRaw {
+		rawBytes, _ := json.Marshal(raw)
+		msg.Raw = rawBytes
 	}
 
 	err := h.mediaMessageRepo.Insert(ctx, msg)
@@ -123,6 +135,7 @@ func (h *DBMessageHelper) saveGroupMessages(ctx context.Context, channel *entity
 	defer close(messages)
 
 	var files []entity.Message
+	var raws []any
 	timer := time.NewTimer(5 * time.Second)
 	defer timer.Stop()
 
@@ -132,7 +145,9 @@ loop:
 	for {
 		select {
 		case message := <-messages:
-			files = h.buildFile(files, message)
+			fs, raw := h.buildFile(files, message)
+			files = fs
+			raws = append(raws, raw)
 			if message.ForwardInfo != nil && messageType < 0 {
 				messageType = h.getMessageType(message)
 			}
@@ -141,7 +156,7 @@ loop:
 		}
 	}
 
-	return h.saveMessages(ctx, channel, config, messageType, files)
+	return h.saveMessages(ctx, channel, config, messageType, files, raws)
 }
 
 func (h *DBMessageHelper) getMessageType(message *client.Message) int {
