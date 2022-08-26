@@ -60,6 +60,11 @@ func (h *ForwardingMessageHelper) buildFile(files []client.InputMessageContent, 
 		files = make([]client.InputMessageContent, 0, 1)
 	}
 
+	mt := h.getMessageType(message)
+	if mt > 0 {
+		messageType = mt
+	}
+
 	caption := "nsfw"
 	switch messageType {
 	case mediamessagetype.SFW:
