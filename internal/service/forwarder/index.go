@@ -2,8 +2,6 @@ package forwarderservice
 
 import (
 	"context"
-	"time"
-
 	"github.com/zelenin/go-tdlib/client"
 	"go.uber.org/ratelimit"
 
@@ -36,7 +34,7 @@ type serviceImpl struct {
 func New(dbChannelID int64) *serviceImpl {
 	service := &serviceImpl{
 		forwarder: forwardingmessagehelper.New(dbChannelID),
-		limiter:   ratelimit.New(300, ratelimit.Per(time.Minute)),
+		limiter:   ratelimit.New(5),
 	}
 	container.Fill(service)
 
