@@ -12,6 +12,7 @@ import (
 	channelrepo "crawl-worker/internal/repository/channel"
 	"crawl-worker/internal/repository/media-message"
 	"crawl-worker/internal/service/dbsaverservice"
+	forwarderservice "crawl-worker/internal/service/forwarder"
 	channelstore "crawl-worker/internal/storage/mysql/channel"
 	mediamessagestore "crawl-worker/internal/storage/mysql/media-message"
 	"crawl-worker/pkg/container"
@@ -80,6 +81,10 @@ func bootstrap(cfg *config.Config) {
 	//region init service
 	container.NamedSingleton("dbsaverService", func() dbsaverservice.IService {
 		return dbsaverservice.New(cfg.IsSaveRaw)
+	})
+
+	container.NamedSingleton("forwarderService", func() forwarderservice.IService {
+		return forwarderservice.New(rootConfig.DBChannelID)
 	})
 	//endregion
 }

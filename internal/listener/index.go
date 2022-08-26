@@ -5,17 +5,17 @@ import (
 
 	"github.com/zelenin/go-tdlib/client"
 
-	"crawl-worker/internal/service/dbsaverservice"
+	forwarderservice "crawl-worker/internal/service/forwarder"
 	"crawl-worker/pkg/container"
 	"crawl-worker/pkg/gpooling"
 	"crawl-worker/pkg/l"
 )
 
 type TelegramListener struct {
-	ll             l.Logger                `container:"name"`
-	gpooling       gpooling.IPool          `container:"name"`
-	tdClient       *client.Client          `container:"name"`
-	dbsaverService dbsaverservice.IService `container:"name"`
+	ll               l.Logger                  `container:"name"`
+	gpooling         gpooling.IPool            `container:"name"`
+	tdClient         *client.Client            `container:"name"`
+	forwarderService forwarderservice.IService `container:"name"`
 }
 
 func New() *TelegramListener {
@@ -37,6 +37,6 @@ func (tl *TelegramListener) Listen() {
 		}
 		message := envelop.Message
 
-		tl.dbsaverService.SaveMessage(ctx, message)
+		tl.forwarderService.ForwardMessage(ctx, message)
 	}
 }

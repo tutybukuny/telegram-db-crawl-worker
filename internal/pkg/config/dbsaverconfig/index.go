@@ -19,6 +19,7 @@ type ConfigMap map[string]*Config
 type RootConfig struct {
 	ConfigMap        ConfigMap `json:"config_map,omitempty"`
 	FilteredContents []string  `json:"filtered_contents,omitempty"`
+	DBChannelID      int64     `json:"db_channel_id"`
 }
 
 func LoadConfig(configPath string) *RootConfig {

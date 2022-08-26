@@ -14,6 +14,7 @@ require (
 	github.com/stretchr/testify v1.7.1
 	github.com/thnthien/impa v1.0.3
 	github.com/zelenin/go-tdlib v0.6.0
+	go.uber.org/ratelimit v0.2.0
 	go.uber.org/zap v1.22.0
 	gorm.io/datatypes v1.0.7
 	gorm.io/driver/mysql v1.3.6
@@ -21,6 +22,7 @@ require (
 )
 
 require (
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect

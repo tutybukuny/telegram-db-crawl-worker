@@ -20,14 +20,11 @@
       "channel_id": -1001251673256,
       "channel_type": 0
     },
-    "-723110497": {
-      "channel_id": -723110497,
-      "channel_type": 0
-    },
     "-1001638127226": {
       "channel_id": -1001638127226,
       "channel_type": 0
     }
   },
-  "filtered_contents": ["win79", "rikvip", "sòng bài las vegas", "nạp rút siêu nhanh"]
+  "filtered_contents": ["win79", "rikvip", "sòng bài las vegas", "nạp rút siêu nhanh"],
+  "db_channel_id": -723110497
 }
